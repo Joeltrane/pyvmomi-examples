@@ -1,21 +1,36 @@
 from pyVmomi import vim
 from pyVim.connect import SmartConnect, Disconnect
-import getpass
 import vmutils
+import argparse
 
-si = None
-username = raw_input('Username: ')
-password = getpass.getpass(prompt='Password: ')
-vcenter = raw_input('vcenter: ')
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--username',
+                    help='Username of the vcenter user that you want to login with. ')
+parser.add_argument('--password',
+                    help='Password of the vcenter user that you want to login with. ')
+parser.add_argument('--vcenter',
+                    help='Domain of the vsphere client. i.e.: somevcenter.yourhost.com ')
+parser.add_argument('--vcenterport',
+                    help='Port number of the vsphere client. Example: 443 ')
+parser.add_argument('--vmname',
+                    help='Name of virtual machine as it appears in vsphere. i.e.: example-mysqldb-server ')
+parser.add_argument('--vmtemplate',
+                    help='Name of template to use as vmware server ')
+
+ARGS = parser.parse_args()
 
 try:
-    si = SmartConnect(host=vcenter, user=username, pwd=password, port=443)
+    si = SmartConnect(user=ARGS.username,
+                      pwd=ARGS.password,
+	                  host=ARGS.vcenter,
+        	          port=ARGS.vcenterport)
 except IOError, e:
     pass
 
 # Finding source VM
-newvm = raw_input('New vm name: ')
-template_vm = vmutils.get_vm_by_name(si, 'centos-6.5-x64')
+newvm = ARGS.vmname
+template_vm = vmutils.get_vm_by_name(si, 'ARGS.vmtemplate')
 
 '''
 There are two roads for modifying a vm creation from a template
